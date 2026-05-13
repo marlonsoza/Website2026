@@ -1,1 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GreenThumb Pro - Gardening Services</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="[cdnjs.cloudflare.com](https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css)">
+</head>
+<body>
+    <div id="app">
+        <!-- Login/Role Selection -->
+        <div id="auth-screen" class="screen active">
+            <div class="auth-container">
+                <div class="logo">
+                    <i class="fas fa-leaf"></i>
+                    <h1>GreenThumb Pro</h1>
+                </div>
+                <p class="tagline">Professional Gardening Services</p>
+                
+                <div class="role-selection">
+                    <button class="role-btn" onclick="loginAs('owner')">
+                        <i class="fas fa-user-tie"></i>
+                        <span>Business Owner</span>
+                    </button>
+                    <button class="role-btn" onclick="showClientLogin()">
+                        <i class="fas fa-user"></i>
+                        <span>Client</span>
+                    </button>
+                </div>
+
+                <div id="client-login" class="client-login hidden">
+                    <h3>Client Access</h3>
+                    <input type="text" id="client-name" placeholder="Your Name" required>
+                    <input type="email" id="client-email" placeholder="Your Email" required>
+                    <input type="tel" id="client-phone" placeholder="Phone Number">
+                    <button class="primary-btn" onclick="loginAsClient()">Continue</button>
+                    <button class="text-btn" onclick="hideClientLogin()">Back</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Owner Dashboard -->
+        <div id="owner-dashboard" class="screen">
+            <nav class="navbar">
+                <div class="nav-brand">
+                    <i class="fas fa-leaf"></i>
+                    <span>GreenThumb Pro</span>
+                </div>
+                <div class="nav-tabs">
+                    <button class="nav-tab active" data-tab="calendar">
+                        <i class="fas fa-calendar"></i> Calendar
+                    </button>
+                    <button class="nav-tab" data-tab="requests">
+                        <i class="fas fa-inbox"></i> Requests
+                        <span class="badge" id="request-badge">0</span>
+                    </button>
+                    <button class="nav-tab" data-tab="negotiations">
+                        <i class="fas fa-comments"></i> Negotiations
+                        <span class="badge" id="nego-badge">0</span>
+                    </button>
+                    <button class="nav-tab" data-tab="settings">
+                        <i class="fas fa-cog"></i> Settings
+                    </button>
+                </div>
+                <button class="logout-btn" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </nav>
+
+            <main class="dashboard-content">
+                <!-- Calendar Tab -->
+                <section id="calendar-tab" class="tab-content active">
+                    <div class="calendar-header">
+                        <button onclick="changeMonth(-1)"><i class="fas fa-chevron-left"></i></button>
+                        <h2 id="current-month"></h2>
+                        <button onclick="changeMonth(1)"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                    <div class="calendar-grid">
+                        <div class="calendar-weekdays">
+                            <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span>
+                            <span>Thu</span><span>Fri</span><span>Sat</span>
+                        </div>
+                        <div id="calendar-days" class="calendar-days"></div>
+                    </div>
+                    <div id="day-appointments" class="day-appointments">
+                        <h3>Appointments for <span id="selected-date"></span></h3>
+                        <div id="appointments-list"></div>
+                    </div>
+                </section>
+
+                <!-- Requests Tab -->
+                <section id="requests-tab" class="tab-content">
+                    <h2>New Service Requests</h2>
+                    <div id="requests-list" class="requests-list"></div>
+                </section>
+
+                <!-- Negotiations Tab -->
+                <section id="negotiations-tab" class="tab-content">
+                    <h2>Active Negotiations</h2>
+                    <div id="negotiations-list" class="negotiations-list"></div>
+                </section>
+
+                <!-- Settings Tab -->
+                <section id="settings-tab" class="tab-content">
+                    <h2>Settings</h2>
+                    <div class="settings-form">
+                        <div class="setting-group">
+                            <label>Email for Reminders</label>
+                            <input type="email" id="owner-email" placeholder="your@email.com">
+                        </div>
+                        <div class="setting-group">
+                            <label>Reminder Time (hours before)</label>
+                            <select id="reminder-time">
+                                <option value="1">1 hour</option>
+                                <option value="2">2 hours</option>
+                                <option value="24" selected>24 hours (1 day)</option>
+                                <option value="48">48 hours (2 days)</option>
+                            </select>
+                        </div>
+                        <div class="setting-group">
+                            <label>Business Name</label>
+                            <input type="text" id="business-name" placeholder="GreenThumb Pro">
+                        </div>
+                        <button class="primary-btn" onclick="saveSettings()">Save Settings</button>
+                    </div>
+                </section>
+            </main>
+        </div>
+
+        <!-- Client Dashboard -->
+        <div id="client-dashboard" class="screen">
+            <nav class="navbar">
+                <div class="nav-brand">
+                    <i class="fas fa-leaf"></i>
+                    <span>GreenThumb Pro</span>
+                </div>
+                <div class="nav-tabs">
+                    <button class="nav-tab active" data-tab="new-request">
+                        <i class="fas fa-plus"></i> New Request
+                    </button>
+                    <button class="nav-tab" data-tab="my-requests">
+                        <i class="fas fa-list"></i> My Requests
+                    </button>
+                    <button class="nav-tab" data-tab="my-appointments">
+                        <i class="fas fa-calendar-check"></i> Appointments
+                    </button>
+                </div>
+                <button class="logout-btn" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </nav>
+
+            <main class="dashboard-content">
+                <!-- New Request Tab -->
+                <section id="new-request-tab" class="tab-content active">
+                    <h2>Request Gardening Service</h2>
+                    <form id="service-request-form" class="request-form">
+                        <div class="form-group">
+                            <label>Service Address</label>
+                            <input type="text" id="service-address" placeholder="Street Address" required>
+                            <div class="address-row">
+                                <input type="text" id="service-city" placeholder="City" required>
+                                <input type="text" id="service-state" placeholder="State" required>
+                                <input type="text" id="service-zip" placeholder="ZIP" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Upload Photos of Your Garden/Yard</label>
+                            <div class="photo-upload" onclick="document.getElementById('photo-input').click()">
+                                <i class="fas fa-camera"></i>
+                                <span>Click to upload photos</span>
+                                <input type="file" id="photo-input" accept="image/*" multiple hidden onchange="handlePhotoUpload(event)">
+                            </div>
+                            <div id="photo-preview" class="photo-preview"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Describe the Work Needed</label>
+                            <textarea id="work-description" rows="4" placeholder="Please describe what gardening services you need..." required></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Your Available Dates</label>
+                            <div id="date-picker" class="date-picker">
+                                <div class="mini-calendar-header">
+                                    <button type="button" onclick="changeMiniMonth(-1)"><i class="fas fa-chevron-left"></i></button>
+                                    <span id="mini-month"></span>
+                                    <button type="button" onclick="changeMiniMonth(1)"><i class="fas fa-chevron-right"></i></button>
+                                </div>
+                                <div class="mini-calendar-weekdays">
+                                    <span>S</span><span>M</span><span>T</span><span>W</span>
+                                    <span>T</span><span>F</span><span>S</span>
+                                </div>
+                                <div id="mini-calendar-days" class="mini-calendar-days"></div>
+                            </div>
+                            <div id="selected-dates" class="selected-dates"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Preferred Time</label>
+                            <select id="preferred-time">
+                                <option value="morning">Morning (8AM - 12PM)</option>
+                                <option value="afternoon">Afternoon (12PM - 5PM)</option>
+                                <option value="flexible">Flexible</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="primary-btn">Submit Request</button>
+                    </form>
+                </section>
+
+                <!-- My Requests Tab -->
+                <section id="my-requests-tab" class="tab-content">
+                    <h2>My Service Requests</h2>
+                    <div id="client-requests-list" class="requests-list"></div>
+                </section>
+
+                <!-- My Appointments Tab -->
+                <section id="my-appointments-tab" class="tab-content">
+                    <h2>Confirmed Appointments</h2>
+                    <div id="client-appointments-list" class="appointments-list"></div>
+                </section>
+            </main>
+        </div>
+
+        <!-- Negotiation Modal -->
+        <div id="negotiation-modal" class="modal">
+            <div class="modal-content negotiation-modal">
+                <button class="modal-close" onclick="closeModal('negotiation-modal')">&times;</button>
+                <div class="negotiation-header">
+                    <h2>Service Negotiation</h2>
+                    <span id="nego-status" class="status-badge"></span>
+                </div>
+                
+                <div class="negotiation-details">
+                    <div class="client-info">
+                        <h4>Client Details</h4>
+                        <p><strong>Name:</strong> <span id="nego-client-name"></span></p>
+                        <p><strong>Address:</strong> <span id="nego-address"></span></p>
+                        <p><strong>Available Dates:</strong> <span id="nego-dates"></span></p>
+                        <p><strong>Preferred Time:</strong> <span id="nego-time"></span></p>
+                    </div>
+                    <div class="work-description">
+                        <h4>Work Description</h4>
+                        <p id="nego-description"></p>
+                    </div>
+                    <div id="nego-photos" class="nego-photos"></div>
+                </div>
+
+                <div class="negotiation-chat">
+                    <h4>Negotiation History</h4>
+                    <div id="chat-messages" class="chat-messages"></div>
+                    
+                    <div id="owner-proposal" class="proposal-form">
+                        <div class="proposal-row">
+                            <div class="form-group">
+                                <label>Proposed Amount ($)</label>
+                                <input type="number" id="proposal-amount" min="0" step="0.01">
+                            </div>
+                            <div class="form-group">
+                                <label>Selected Date</label>
+                                <select id="proposal-date"></select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Message</label>
+                            <textarea id="proposal-message" rows="2" placeholder="Add details about the quote..."></textarea>
+                        </div>
+                        <button class="primary-btn" onclick="sendProposal()">Send Proposal</button>
+                    </div>
+
+                    <div id="client-response" class="response-form hidden">
+                        <div class="current-offer">
+                            <p>Current Offer: <strong>$<span id="current-amount"></span></strong></p>
+                            <p>Proposed Date: <strong><span id="current-date"></span></strong></p>
+                        </div>
+                        <div class="form-group">
+                            <label>Counter Offer (optional)</label>
+                            <input type="number" id="counter-amount" min="0" step="0.01" placeholder="Leave blank to accept">
+                        </div>
+                        <div class="form-group">
+                            <label>Message</label>
+                            <textarea id="counter-message" rows="2" placeholder="Add a message..."></textarea>
+                        </div>
+                        <div class="response-buttons">
+                            <button class="success-btn" onclick="acceptOffer()">Accept Offer</button>
+                            <button class="primary-btn" onclick="sendCounterOffer()">Send Counter</button>
+                            <button class="danger-btn" onclick="declineOffer()">Decline</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Appointment Detail Modal -->
+        <div id="appointment-modal" class="modal">
+            <div class="modal-content">
+                <button class="modal-close" onclick="closeModal('appointment-modal')">&times;</button>
+                <h2>Appointment Details</h2>
+                <div id="appointment-details"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
 
